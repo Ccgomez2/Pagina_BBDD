@@ -41,7 +41,15 @@ def recibir_pedido():
 @app.route("/estado", methods=["GET"])
 def estado():
     bd = cargar_bd()
-    return jsonify(bd["contadores"])
+    return jsonify({
+        "pedidos": {
+            "fresa": sum(p["cantidad"] for p in bd["pedidos"] if p["sabor"] == "fresa"),
+            "vainilla": sum(p["cantidad"] for p in bd["pedidos"] if p["sabor"] == "vainilla"),
+            "chocolate": sum(p["cantidad"] for p in bd["pedidos"] if p["sabor"] == "chocolate")
+        },
+        "hechos": bd["contadores"]
+    })
+
 
 @app.route("/", methods=["GET"])
 def home():
