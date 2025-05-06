@@ -1,21 +1,17 @@
 from flask import Flask, request, jsonify
-import json, os
+import json
 import paho.mqtt.publish as publish
 
 app = Flask(__name__)
 from flask_cors import CORS
 CORS(app)
-DB_PATH = "database.json"
 
-def cargar_bd():
-    if not os.path.exists(DB_PATH):
-        return {"pedidos": [], "contadores": {"fresa": 0, "vainilla": 0, "chocolate": 0, "defectuosos": 0}}
-    with open(DB_PATH, "r") as f:
-        return json.load(f)
-
-def guardar_bd(data):
-    with open(DB_PATH, "w") as f:
-        json.dump(data, f)
+bd = {
+    "pedidos": [],
+    "contadores": {
+        "fresa": 0, "vainilla": 0, "chocolate": 0, "defectuosos": 0
+    }
+}
 
 @app.route("/pedido", methods=["POST"])
 def recibir_pedido():
@@ -27,12 +23,9 @@ def recibir_pedido():
     if not nombre or not sabor or not cantidad:
         return jsonify({"error": "Faltan campos obligatorios"}), 400
 
-    bd = cargar_bd()
     bd["pedidos"].append({"nombre": nombre, "sabor": sabor, "cantidad": cantidad})
     bd["contadores"][sabor] += cantidad
-    guardar_bd(bd)
 
-    # MQTT
     mensaje = json.dumps({"evento": "nuevo_pedido", "sabor": sabor, "cantidad": cantidad})
     publish.single("richi5/giirob/pr2/enviar/web", mensaje, hostname="broker.emqx.io", port=1883)
 
@@ -40,7 +33,6 @@ def recibir_pedido():
 
 @app.route("/estado", methods=["GET"])
 def estado():
-    bd = cargar_bd()
     return jsonify({
         "pedidos": {
             "fresa": sum(p["cantidad"] for p in bd["pedidos"] if p["sabor"] == "fresa"),
@@ -50,10 +42,11 @@ def estado():
         "hechos": bd["contadores"]
     })
 
-
 @app.route("/", methods=["GET"])
 def home():
     return "Servidor de Bollikaos funcionando 🥐"
-    
+
 if __name__ == "__main__":
+    import os
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)))
+
