@@ -3,6 +3,8 @@ import json, os
 import paho.mqtt.publish as publish
 
 app = Flask(__name__)
+from flask_cors import CORS
+CORS(app)
 DB_PATH = "database.json"
 
 def cargar_bd():
