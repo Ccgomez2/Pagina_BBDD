@@ -1,0 +1,10 @@
+{
+    "pedidos": [],
+    "contadores": {
+      "fresa": 0,
+      "vainilla": 0,
+      "chocolate": 0,
+      "defectuosos": 0
+    }
+  }
+  
