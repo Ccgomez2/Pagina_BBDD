@@ -41,5 +41,9 @@ def estado():
     bd = cargar_bd()
     return jsonify(bd["contadores"])
 
+@app.route("/", methods=["GET"])
+def home():
+    return "Servidor de Bollikaos funcionando 🥐"
+    
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=int(os.getenv("PORT", 5000)))
